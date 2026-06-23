@@ -1,5 +1,5 @@
 <?php
-// Load Koneksi dan Semua Model
+// Load Koneksi dan Model (Murni Tanpa Mengubah Isinya)
 require_once __DIR__ . '/config/Connection.php';
 require_once __DIR__ . '/models/karyawan.php';
 require_once __DIR__ . '/models/karyawankontrak.php';
@@ -12,6 +12,54 @@ $db = $connectionObj->getConnection();
 
 // Ambil parameter filter dari URL (Default: Semua)
 $filter = isset($_GET['jenis']) ? $_GET['jenis'] : 'Semua';
+
+// Query Mengambil Data dari tabel_karyawan
+$sql = "SELECT * FROM tabel_karyawan";
+if ($filter !== 'Semua') {
+    $sql .= " WHERE jenis_karyawan = '" . $db->real_escape_string($filter) . "'";
+}
+$result = $db->query($sql);
+
+// Array penampung gabungan: menyimpan ID database dan Object Karyawan
+$listKaryawan = [];
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $obj = null;
+        // Mapping relasi data database ke Class Objek yang sesuai
+        switch ($row['jenis_karyawan']) {
+            case 'Kontrak':
+                $obj = new karyawankontrak(
+                    $row['id_karyawan'], $row['nama_karyawan'], $row['departemen'],
+                    $row['hari_kerja_masuk'], $row['gaji_dasar_per_hari'],
+                    $row['durasi_kontrak_bulan'], $row['agensi_penyalur']
+                );
+                break;
+            case 'Tetap':
+                $obj = new karyawantetap(
+                    $row['id_karyawan'], $row['nama_karyawan'], $row['departemen'],
+                    $row['hari_kerja_masuk'], $row['gaji_dasar_per_hari'],
+                    $row['tunjangan_kesehatan'], $row['opsi_saham_id']
+                );
+                break;
+            case 'Magang':
+                $obj = new karyawanmagang(
+                    $row['id_karyawan'], $row['nama_karyawan'], $row['departemen'],
+                    $row['hari_kerja_masuk'], $row['gaji_dasar_per_hari'],
+                    $row['uang_saku_bulanan'], $row['sertifikat_kampus_merdeka']
+                );
+                break;
+        }
+        
+        // Simpan ke dalam array berpasangan jika objek berhasil dibuat
+        if ($obj !== null) {
+            $listKaryawan[] = [
+                'id' => $row['id_karyawan'],
+                'object' => $obj
+            ];
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -84,23 +132,25 @@ $filter = isset($_GET['jenis']) ? $_GET['jenis'] : 'Semua';
                         <th>Kategori</th>
                         <th>Spesifikasi Jabatan (Khusus)</th>
                         <th>Gaji Bersih</th>
-                    </tr>
+                        <th>Aksi</th> </tr>
                 </thead>
                 <tbody>
-                    <?php 
-                    // MURNI COMOT LANGSUNG DARI METHOD JATUH TEMPATNYA SEPERTI SEBUAH COMPONENT
-                    if ($filter == 'Semua') {
-                        echo karyawantetap::tampilkanSemua($db);
-                        echo karyawankontrak::tampilkanSemua($db);
-                        echo karyawanmagang::tampilkanSemua($db);
-                    } elseif ($filter == 'Tetap') {
-                        echo karyawantetap::tampilkanSemua($db);
-                    } elseif ($filter == 'Kontrak') {
-                        echo karyawankontrak::tampilkanSemua($db);
-                    } elseif ($filter == 'Magang') {
-                        echo karyawanmagang::tampilkanSemua($db);
-                    }
-                    ?>
+                    <?php if (empty($listKaryawan)): ?>
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">Data karyawan tidak ditemukan atau kosong.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php 
+                        // Menjalankan Loop Polimorfisme secara dinamis
+                        foreach ($listKaryawan as $item) {
+                            $rowHtml = $item['object']->tampilkanProfilKaryawan();
+                            
+                            // TRIK: Sisipkan kolom tombol Lihat Slip tepat sebelum tag penutup baris </tr>
+                            $tombolAksi = "<td><a href='slip_gaji.php?id_karyawan={$item['id']}' class='btn btn-sm btn-primary'>Lihat Slip</a></td></tr>";
+                            echo str_replace('</tr>', $tombolAksi, $rowHtml);
+                        }
+                        ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
