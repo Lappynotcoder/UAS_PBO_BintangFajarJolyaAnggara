@@ -6,7 +6,6 @@ class karyawantetap extends karyawan {
     protected $tunjanganKesehatan;
     protected $opsiSahamId;
 
-    // Constructor untuk menginisialisasi properti global & spesifik
     public function __construct($id_karyawan, $nama_karyawan, $departemen, $hari_kerja_masuk, $gaji_dasar_per_hari, $tunjanganKesehatan, $opsiSahamId) {
         $this->id_karyawan = $id_karyawan;
         $this->nama_karyawan = $nama_karyawan;
@@ -17,7 +16,6 @@ class karyawantetap extends karyawan {
         $this->opsiSahamId = $opsiSahamId;
     }
 
-    // Metode turunan (tempat pengisian logika dikosongkan dulu)
     public function hitungGajiBersih(): float {
         return (float) (($this->hari_kerja_masuk * $this->gaji_dasar_per_hari) + $this->tunjanganKesehatan);
     }
@@ -37,5 +35,24 @@ class karyawantetap extends karyawan {
             </td>
             <td class='fw-bold text-success'>Rp " . number_format($gajiBersih, 0, ',', '.') . "</td>
         </tr>";
+    }
+
+    // JADI SATU: Fungsi static untuk query database sekaligus render baris tabel
+    public static function tampilkanSemua($db): string {
+        $sql = "SELECT * FROM tabel_karyawan WHERE jenis_karyawan = 'Tetap'";
+        $result = $db->query($sql);
+        $html = "";
+
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $karyawan = new self(
+                    $row['id_karyawan'], $row['nama_karyawan'], $row['departemen'],
+                    $row['hari_kerja_masuk'], $row['gaji_dasar_per_hari'],
+                    $row['tunjangan_kesehatan'], $row['opsi_saham_id']
+                );
+                $html .= $karyawan->tampilkanProfilKaryawan();
+            }
+        }
+        return $html;
     }
 }
