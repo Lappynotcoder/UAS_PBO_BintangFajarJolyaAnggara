@@ -19,8 +19,7 @@ class karyawankontrak extends karyawan {
 
     // Metode turunan (tempat pengisian logika dikosongkan dulu)
     public function hitungGajiBersih(): float {
-        // TODO: Silakan isi dengan logika perhitungan gaji karyawan kontrak di sini
-        return 0.0;
+        return (float) ($this->hari_kerja_masuk * $this->gaji_dasar_per_hari);
     }
 
     public function tampilkanProfilKaryawan(): string {

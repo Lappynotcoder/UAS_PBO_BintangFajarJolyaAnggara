@@ -19,8 +19,7 @@ class karyawanmagang extends karyawan {
 
     // Metode turunan (tempat pengisian logika dikosongkan dulu)
     public function hitungGajiBersih(): float {
-        // TODO: Silakan isi dengan logika perhitungan gaji karyawan magang di sini
-        return 0.0;
+        return (float) (($this->hari_kerja_masuk * $this->gaji_dasar_per_hari) * 0.80);
     }
 
     public function tampilkanProfilKaryawan(): string {
