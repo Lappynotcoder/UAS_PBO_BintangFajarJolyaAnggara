@@ -23,7 +23,19 @@ class karyawankontrak extends karyawan {
     }
 
     public function tampilkanProfilKaryawan(): string {
-        // TODO: Silakan isi dengan logika penampilan data profil karyawan kontrak di sini
-        return "";
+        $gajiBersih = $this->hitungGajiBersih();
+        return "<tr>
+            <td><strong>#{$this->id_karyawan}</strong></td>
+            <td>{$this->nama_karyawan}</td>
+            <td>{$this->departemen}</td>
+            <td>{$this->hari_kerja_masuk} Hari</td>
+            <td>Rp " . number_format($this->gaji_dasar_per_hari, 0, ',', '.') . "</td>
+            <td><span class='badge bg-warning text-dark'>Kontrak</span></td>
+            <td>
+                <span class='text-muted'>Durasi:</span> {$this->durasiKontrakBulan} Bulan<br>
+                <span class='text-muted'>Agensi:</span> {$this->agensiPenyalur}
+            </td>
+            <td class='fw-bold text-success'>Rp " . number_format($gajiBersih, 0, ',', '.') . "</td>
+        </tr>";
     }
 }

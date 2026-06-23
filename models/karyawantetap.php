@@ -23,7 +23,19 @@ class karyawantetap extends karyawan {
     }
 
     public function tampilkanProfilKaryawan(): string {
-        // TODO: Silakan isi dengan logika penampilan data profil karyawan tetap di sini
-        return "";
+        $gajiBersih = $this->hitungGajiBersih();
+        return "<tr>
+            <td><strong>#{$this->id_karyawan}</strong></td>
+            <td>{$this->nama_karyawan}</td>
+            <td>{$this->departemen}</td>
+            <td>{$this->hari_kerja_masuk} Hari</td>
+            <td>Rp " . number_format($this->gaji_dasar_per_hari, 0, ',', '.') . "</td>
+            <td><span class='badge bg-success'>Tetap</span></td>
+            <td>
+                <span class='text-muted'>Tunjangan:</span> Rp " . number_format($this->tunjanganKesehatan, 0, ',', '.') . "<br>
+                <span class='text-muted'>Saham ID:</span> {$this->opsiSahamId}
+            </td>
+            <td class='fw-bold text-success'>Rp " . number_format($gajiBersih, 0, ',', '.') . "</td>
+        </tr>";
     }
 }
